@@ -6,6 +6,8 @@ import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -16,6 +18,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -52,6 +55,8 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	private Vec2f mouseLoc; 
 	private FrameRateCalc frameRate;
 	
+	private Button startButton;
+	
 	/**
 	 * This is the entry point method.
 	 */
@@ -62,6 +67,15 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		
 		scoreLabel = new Label();
 		RootPanel.get().add(scoreLabel);
+		
+		startButton = new Button("Start");
+		RootPanel.get().add(startButton);
+		startButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				reset();
+				timer.scheduleRepeating(100);
+			}
+		});
 		
 		Canvas canvas = Canvas.createIfSupported();
 		if(canvas==null) {
@@ -89,13 +103,23 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		duration = new Duration();
 		lastUpdate = duration.elapsedMillis();
 		timer = new Timer() {
-			
 			@Override
 			public void run() {
 				update();
 			}
 		};
-		timer.scheduleRepeating(100);
+		
+	}
+	
+	public void reset() {
+		score = 0;
+		helicopter.loc.x = 0;
+		helicopter.loc.y = canvasHeight/2;
+		helicopter.vel.y = 0; helicopter.vel.x = 0;		
+		landscape.reset();
+		for(int i=0; i < MAX_KEYS; ++i) {
+			keys[i] = false;
+		}
 	}
 	
 	public void update() {
@@ -129,7 +153,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 			//helicopter.vel.y+= 80*delta;
 		}
 		if(landscape.collides(helicopter.box)) {
-			score=0;
+			timer.cancel();
 		}
 	}
 	

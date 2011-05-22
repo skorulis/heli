@@ -35,12 +35,6 @@ public class Landscape implements RenderComponent,UpdateComponent{
 		topHeight = new int[segs];
 		bottomHeight = new int[segs];
 		
-		
-		topHeight[0] = 60;
-		bottomHeight[0] = 60;
-		for(int i=1; i < topHeight.length; ++i) {
-			generatePosition(i);
-		}
 		reset();
 	}
 	
@@ -48,6 +42,13 @@ public class Landscape implements RenderComponent,UpdateComponent{
 		minGap = 200;
 		slideF = 0; slideI = 0;
 		shrink = -1;
+		
+		topHeight[0] = 60;
+		bottomHeight[0] = 60;
+		for(int i=1; i < topHeight.length; ++i) {
+			generatePosition(i);
+		}
+		
 	}
 	
 	public void generatePosition(int position) {
