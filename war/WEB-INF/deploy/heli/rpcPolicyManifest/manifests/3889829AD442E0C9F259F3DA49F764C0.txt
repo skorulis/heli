@@ -1,0 +1,2 @@
+serviceClass: com.skorulis.heli.client.GreetingService
+path: 074257213DE15356955C60504734DF7B.gwt.rpc
