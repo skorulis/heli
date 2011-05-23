@@ -12,9 +12,7 @@ h1 {
 
 canvas {
 	position:absolute;
-	top:0px;
-	left:0px;
-	display:inline;
+	z-index:-1;
 }
 
 
@@ -23,4 +21,8 @@ canvas {
 	position:absolute;
 	top:0px;
 	left:0px;
+}
+
+button {
+	z-index:2;	
 }

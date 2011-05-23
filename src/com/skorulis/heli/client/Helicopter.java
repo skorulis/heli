@@ -15,9 +15,12 @@ public class Helicopter {
 	ClipLoc2f vel;
 	Gen2fComponent acc;
 	ImageElement image;
+	ImageElement frame2;
 	
 	Vec2f target;
 	boolean firing;
+	boolean secondFrame;
+	float frameSwitch;
 	
 	RectBoundBox box;
 	
@@ -28,6 +31,7 @@ public class Helicopter {
 		vel.setBounds(-80, -80, 80, 80);
 		acc = new Gen2fComponent(vel,0,30);
 		image = (ImageElement) new Image("helicopter.png").getElement().cast();
+		frame2 = (ImageElement) new Image("helicopter2.png").getElement().cast();
 		box = new RectBoundBox();
 		box.width = image.getWidth();
 		box.height = image.getHeight();
@@ -40,7 +44,7 @@ public class Helicopter {
 	}
 
 	public void render(Context2d context) {
-		context.drawImage(image, loc.x, loc.y);
+		context.drawImage(secondFrame?frame2:image, loc.x, loc.y);
 	}
 
 	public void update(float delta) {
@@ -50,6 +54,11 @@ public class Helicopter {
 		box.height = image.getHeight()-8;
 		box.x = loc.x+4;
 		box.y = loc.y+4;
+		frameSwitch+=delta;
+		if(frameSwitch>0.2f) {
+			frameSwitch=0;
+			secondFrame=!secondFrame;
+		}
 	}
 	
 }

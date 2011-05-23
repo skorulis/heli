@@ -73,8 +73,13 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		
 		
 		final Canvas canvas = Canvas.createIfSupported();
+		RootPanel.get().add(canvas);
+		if(canvas==null) {
+			return;
+		}
 		startButton = new Button("Start");
 		RootPanel.get().add(startButton);
+		
 		startButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				canvas.setFocus(true);
@@ -84,9 +89,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		});
 		
 		
-		if(canvas==null) {
-			return;
-		}
+		
 		canvas.setWidth(canvasWidth+"px");
 		canvas.setCoordinateSpaceWidth(canvasWidth);
 		
@@ -94,11 +97,10 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		canvas.setCoordinateSpaceHeight(canvasHeight);
 		canvas.addKeyDownHandler(this);
 		canvas.addKeyUpHandler(this);
-		canvas.addMouseMoveHandler(this);
-		canvas.addMouseDownHandler(this);
-		canvas.addMouseUpHandler(this);
+		//canvas.addMouseMoveHandler(this);
+		//canvas.addMouseDownHandler(this);
+		//canvas.addMouseUpHandler(this);
 		
-		RootPanel.get().add(canvas);
 		context = canvas.getContext2d();
 
 		mouseLoc = new Vec2f();
