@@ -35,8 +35,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	private int MAX_KEYS = 256;
 	
 	private Context2d context;
-	private Label frameLabel;
-	private Label scoreLabel;
+	private Label frameLabel,scoreLabel,bestLabel;
 	private float score,bestScore;
 	
 	private final static int canvasWidth = 600;
@@ -52,7 +51,8 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	
 	private Helicopter helicopter;
 	private Landscape landscape;
-	final CssColor redrawColor = CssColor.make("rgba(255,255,255,0.8)");
+	private boolean mouseDown;
+	final CssColor redrawColor = CssColor.make("rgba(255,255,255,1.0)");
 	
 	private Vec2f mouseLoc; 
 	private FrameRateCalc frameRate;
@@ -65,24 +65,29 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	 */
 	public void onModuleLoad() {
 		frameRate = new FrameRateCalc();
-		frameLabel = new Label("FrameRate:");
+		frameLabel = new Label();
 		RootPanel.get().add(frameLabel);
+		
+		final Canvas canvas = Canvas.createIfSupported();
+		if(canvas==null) {
+			RootPanel.get().add(new Label("Canvas is not supported by your browser"));
+			return;
+		}
+		RootPanel.get().add(canvas);
+		startButton = new Button("Start");
+		startButton.setStyleName("start");
+		RootPanel.get().add(startButton);
 		
 		scoreLabel = new Label();
 		RootPanel.get().add(scoreLabel);
 		
-		
-		final Canvas canvas = Canvas.createIfSupported();
-		RootPanel.get().add(canvas);
-		if(canvas==null) {
-			return;
-		}
-		startButton = new Button("Start");
-		RootPanel.get().add(startButton);
+		bestLabel = new Label();
+		RootPanel.get().add(bestLabel);
 		
 		startButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				canvas.setFocus(true);
+				startButton.setVisible(false);
 				reset();
 				timer.scheduleRepeating(20);
 			}
@@ -97,9 +102,8 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		canvas.setCoordinateSpaceHeight(canvasHeight);
 		canvas.addKeyDownHandler(this);
 		canvas.addKeyUpHandler(this);
-		//canvas.addMouseMoveHandler(this);
-		//canvas.addMouseDownHandler(this);
-		//canvas.addMouseUpHandler(this);
+		canvas.addMouseDownHandler(this);
+		canvas.addMouseUpHandler(this);	
 		
 		context = canvas.getContext2d();
 
@@ -110,7 +114,6 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		duration = new Duration();
 		lastUpdate = duration.elapsedMillis();
 		String best = Cookies.getCookie("score");
-		GWT.log("SCORE " + best);
 		if(best!=null) {
 			bestScore = Float.valueOf(best);
 			landscape.setBestScore(bestScore);
@@ -131,6 +134,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		for(int i=0; i < MAX_KEYS; ++i) {
 			keys[i] = false;
 		}
+		mouseDown = false;
 	}
 	
 	public void update() {
@@ -144,9 +148,10 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		frameLabel.setText("" + frameRate.getTmpFrameRate() + " frames a second");
 		score+=delta*landscape.slideRate;
 		scoreLabel.setText("Score: " + (int)score);
-		
+		bestLabel.setText("Best: " + (int) Math.max(score, bestScore));
 		
 		context.setFillStyle(redrawColor);
+		
 	    context.fillRect(0, 0, canvasWidth, canvasHeight);
 		
 	    landscape.update(delta);
@@ -155,7 +160,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		helicopter.update(delta);
 		helicopter.render(context);
 		
-		if(keys['W']) {
+		if(keys['W'] || mouseDown) {
 			helicopter.vel.y+= -130*delta;
 		}
 		if(keys['D']) {
@@ -180,6 +185,9 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		
 		Cookies.setCookie("score", ""+bestScore, expires);
 		landscape.setBestScore(bestScore);
+		
+		startButton.setVisible(true);
+		startButton.setText("Restart");
 	}	
 
 	@Override
@@ -206,11 +214,11 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 
 	@Override
 	public void onMouseUp(MouseUpEvent event) {
-		helicopter.firing = true;
+		mouseDown = false;
 	}
 
 	@Override
 	public void onMouseDown(MouseDownEvent event) {
-		helicopter.firing = false;
+		mouseDown = true;
 	}
 }

@@ -13,16 +13,26 @@ h1 {
 canvas {
 	position:absolute;
 	z-index:-1;
+	border-color:#000000;
+	border-width:1px;
+	border-style: solid;
 }
 
-
-
-#buttonDiv {
-	position:absolute;
-	top:0px;
-	left:0px;
-}
 
 button {
+	position:absolute;
 	z-index:2;	
+}
+
+button.start {
+	top:200px;
+	left:265px;
+	font-size: 30px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.gwt-Label {
+	margin-left: 10px;
+	font-weight: bold;	
 }
