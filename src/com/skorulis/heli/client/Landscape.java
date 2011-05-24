@@ -7,6 +7,7 @@ import com.skorulis.heli.base.RectBoundBox;
 import com.skorulis.heli.base.RenderComponent;
 import com.skorulis.heli.base.UpdateComponent;
 
+
 public class Landscape implements RenderComponent,UpdateComponent{
 
 	public static final int SEGMENT_WIDTH = 20;

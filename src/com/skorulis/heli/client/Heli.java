@@ -2,6 +2,8 @@ package com.skorulis.heli.client;
 
 import java.util.Date;
 
+import org.apache.tools.ant.taskdefs.Java;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
@@ -92,7 +94,6 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 				timer.scheduleRepeating(20);
 			}
 		});
-		
 		
 		
 		canvas.setWidth(canvasWidth+"px");
