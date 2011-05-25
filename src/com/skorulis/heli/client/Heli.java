@@ -1,8 +1,8 @@
 package com.skorulis.heli.client;
 
 import java.util.Date;
-
-import org.apache.tools.ant.taskdefs.Java;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -37,7 +37,6 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	private int MAX_KEYS = 256;
 	
 	private Context2d context;
-	private Label frameLabel,scoreLabel,bestLabel;
 	private float score,bestScore;
 	
 	private final static int canvasWidth = 600;
@@ -46,6 +45,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	
 	private int lastUpdate;
 	private int current;
+	private float smokeUpdate;
 	
 	Duration duration;
 	
@@ -55,20 +55,21 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	private Landscape landscape;
 	private boolean mouseDown;
 	final CssColor redrawColor = CssColor.make("rgba(255,255,255,1.0)");
+	final CssColor textColor = CssColor.make("rgba(0,0,0,1)");
 	
 	private Vec2f mouseLoc; 
 	private FrameRateCalc frameRate;
 	
 	private Button startButton;
 	
+	private LinkedList<HeliSmoke> smoke;
 	
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
 		frameRate = new FrameRateCalc();
-		frameLabel = new Label();
-		RootPanel.get().add(frameLabel);
+		smoke = new LinkedList<HeliSmoke>();
 		
 		final Canvas canvas = Canvas.createIfSupported();
 		if(canvas==null) {
@@ -79,12 +80,6 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		startButton = new Button("Start");
 		startButton.setStyleName("start");
 		RootPanel.get().add(startButton);
-		
-		scoreLabel = new Label();
-		RootPanel.get().add(scoreLabel);
-		
-		bestLabel = new Label();
-		RootPanel.get().add(bestLabel);
 		
 		startButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -130,6 +125,7 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	
 	public void reset() {
 		score = 0;
+		smoke.clear();
 		helicopter.reset();		
 		landscape.reset();
 		for(int i=0; i < MAX_KEYS; ++i) {
@@ -145,11 +141,10 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 		if(delta > 0.5f) {
 			return; //Don't update when the delta values are very high
 		}
+		
+		
 		frameRate.addFrame(delta);
-		frameLabel.setText("" + frameRate.getTmpFrameRate() + " frames a second");
 		score+=delta*landscape.slideRate;
-		scoreLabel.setText("Score: " + (int)score);
-		bestLabel.setText("Best: " + (int) Math.max(score, bestScore));
 		
 		context.setFillStyle(redrawColor);
 		
@@ -158,8 +153,35 @@ public class Heli implements EntryPoint,KeyUpHandler,KeyDownHandler,MouseMoveHan
 	    landscape.update(delta);
 	    landscape.render(context);
 	    
+	    Iterator<HeliSmoke> smokeIt = smoke.iterator();
+	    HeliSmoke hs;
+	    while(smokeIt.hasNext()) {
+	    	hs = smokeIt.next();
+	    	if(hs.isAlive()) {
+	    		hs.landRate = landscape.slideRate;
+		    	hs.update(delta);
+				hs.render(context);	
+	    	} else {
+	    		smokeIt.remove();
+	    	}
+			
+	    }
+	    
 		helicopter.update(delta);
 		helicopter.render(context);
+		
+		if(smokeUpdate > 0.35f) {
+			smokeUpdate = 0;
+			smoke.add(new HeliSmoke(helicopter.loc));
+		} else {
+			smokeUpdate+=delta;
+		}
+		
+		context.setFillStyle(textColor);
+		context.fillText("Score: " + (int)score, 10, 10);
+		context.fillText("Best: " + (int) Math.max(score, bestScore), 10, 20);
+		context.fillText("" + frameRate.getTmpFrameRate() + " frames a second",10,30);
+		context.fill();
 		
 		if(keys['W'] || mouseDown) {
 			helicopter.vel.y+= -130*delta;
